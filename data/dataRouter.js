@@ -14,26 +14,9 @@ router.get('/posts', async (req, res) => {
 
     catch (error) {
         console.log(error);
+
         res.status(500).json({ message: 'Error retrieving the posts' });
     }
-});
-
-router.get('/posts/:id', (req, res) => {
-    Posts.getById(req.params.id)
-        .then(post => {
-            if (!post) {
-                res.status(404).json({ message: 'Post not found' });
-            }
-
-            else res.status(200).json(post);
-        })
-
-        .catch(error => {
-            console.log(error);
-
-            res.status(500).json({ message: 'Error retrieving the post' });
-        }
-    );
 });
 
 router.get('/posts/:id', async (req, res) => {
@@ -55,8 +38,10 @@ router.get('/posts/:id', async (req, res) => {
 });
 
 router.post('/posts', async (req, res) => {
+    const postDetails = req.body;
+
     try {
-        const post = await Posts.insert(req.body);
+        const post = await Posts.insert(postDetails);
 
         res.status(201).json(post);
     }
@@ -64,7 +49,11 @@ router.post('/posts', async (req, res) => {
     catch (error) {
         console.log(error);
 
-        res.status(500).json({ message: 'Error inserting the post' });
+        if (!postDetails.text || !postDetails.user_id){
+            res.status(400).json({ errorMessage: "Please provide the text and user ID for the post." });
+        }
+
+        else res.status(500).json({ message: 'Error inserting the post' });
     }
 });
 
@@ -119,24 +108,6 @@ router.get('/users', async (req, res) => {
     }
 });
 
-router.get('/users/:id', (req, res) => {
-    Users.getById(req.params.id)
-        .then(user => {
-            if (!user) {
-                res.status(404).json({ message: 'User not found' });
-            }
-
-            else res.status(200).json(user);
-        })
-
-        .catch(error => {
-            console.log(error);
-
-            res.status(500).json({ message: 'Error retrieving the user' });
-        }
-    );
-});
-
 router.get('/users/:id', async (req, res) => {
     try {
         const user = await Users.getById(req.params.id);
@@ -156,6 +127,8 @@ router.get('/users/:id', async (req, res) => {
 });
 
 router.post('/users', async (req, res) => {
+    const userDetails = req.body;
+
     try {
         const user = await Users.insert(req.body);
 
@@ -165,7 +138,11 @@ router.post('/users', async (req, res) => {
     catch (error) {
         console.log(error);
 
-        res.status(500).json({ message: 'Error inserting the user' });
+        if (!userDetails.name){
+            res.status(400).json({ errorMessage: "Please provide the text and user ID for the post." });
+        }
+
+        else res.status(500).json({ message: 'Error inserting the user' });
     }
 });
 
@@ -209,12 +186,16 @@ router.get('/users/:userId/posts', (req, res) => {
     const { userId } = req.params;
     Users.getUserPosts(userId)
         .then(usersPosts => {
-            if (usersPosts === 0) {
+            if (usersPosts.length === 0) {
                 res.status(404).json({ message: 'No posts by this user' });
             }
+
             else res.status(200).json(usersPosts);
         })
+
         .catch(error => {
+            console.log(error);
+
             res.status(500).json({ message: 'Error getting posts by this user' });
         });
 });
