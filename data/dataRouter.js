@@ -41,9 +41,9 @@ router.post('/posts', async (req, res) => {
     const postDetails = req.body;
 
     try {
-        const post = await Posts.insert(postDetails);
+        await Posts.insert(postDetails);
 
-        res.status(201).json(post);
+        res.status(201).json(postDetails);
     }
 
     catch (error) {
@@ -59,8 +59,8 @@ router.post('/posts', async (req, res) => {
 
 router.delete('/posts/:id', async (req, res) => {
     try {
-        const count = await Posts.remove(req.params.id);
-        if (!count) {
+        const post = await Posts.remove(req.params.id);
+        if (!post) {
             res.status(404).json({ message: 'The post could not be found' });
         }
 
@@ -75,20 +75,26 @@ router.delete('/posts/:id', async (req, res) => {
 });
 
 router.put('/posts/:id', async (req, res) => {
+    const postDetails = req.body;
+
     try {
-        const post = await Posts.update(req.params.id, req.body);
+        const post = await Posts.update(req.params.id, postDetails);
 
         if (!post) {
             res.status(404).json({ message: 'The post could not be found' });
         }
 
-        else res.status(200).json(post);
+        else res.status(200).json(postDetails);
     }
 
     catch (error) {
         console.log(error);
 
-        res.status(500).json({ message: 'Error updating the post' });
+        if (!postDetails.text || !postDetails.user_id){
+            res.status(400).json({ errorMessage: "Please provide the text and user ID to change the post." });
+        }
+
+        else res.status(500).json({ message: 'Error updating the post' });
     }
 });
 
@@ -130,16 +136,16 @@ router.post('/users', async (req, res) => {
     const userDetails = req.body;
 
     try {
-        const user = await Users.insert(req.body);
+        await Users.insert(userDetails);
 
-        res.status(201).json(user);
+        res.status(201).json(userDetails);
     }
 
     catch (error) {
         console.log(error);
 
         if (!userDetails.name){
-            res.status(400).json({ errorMessage: "Please provide the text and user ID for the post." });
+            res.status(400).json({ errorMessage: "Please provide the name for the user." });
         }
 
         else res.status(500).json({ message: 'Error inserting the user' });
@@ -148,9 +154,9 @@ router.post('/users', async (req, res) => {
 
 router.delete('/users/:id', async (req, res) => {
     try {
-        const count = await Users.remove(req.params.id);
+        const user = await Users.remove(req.params.id);
 
-        if (!count) {
+        if (!user) {
             res.status(404).json({ message: 'The user could not be found' });
         }
 
@@ -165,6 +171,8 @@ router.delete('/users/:id', async (req, res) => {
 });
 
 router.put('/users/:id', async (req, res) => {
+    const userDetails = req.body;
+
     try {
         const user = await Users.update(req.params.id, req.body);
 
@@ -172,32 +180,38 @@ router.put('/users/:id', async (req, res) => {
             res.status(404).json({ message: 'The user could not be found' });
         }
 
-        else res.status(200).json(user);
+        else res.status(200).json(userDetails);
+    }
+
+    catch (error) {
+        console.log(error);
+        
+        if (!userDetails.name){
+            res.status(400).json({ errorMessage: "Please provide the new name for the user." });
+        }
+
+        else res.status(500).json({ message: 'Error updating the user' });
+    }
+});
+
+router.get('/users/postsByUser/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const userPosts = await Users.getUserPosts(userId);
+
+        if (userPosts.length === 0) {
+            res.status(404).json({ message: 'No posts by this user' });
+        }
+
+        else res.status(200).json(userPosts);
     }
 
     catch (error) {
         console.log(error);
 
-        res.status(500).json({ message: 'Error updating the user' });
+        res.status(500).json({ message: 'Error getting posts by this user' });
     }
-});
-
-router.get('/users/:userId/posts', (req, res) => {
-    const { userId } = req.params;
-    Users.getUserPosts(userId)
-        .then(usersPosts => {
-            if (usersPosts.length === 0) {
-                res.status(404).json({ message: 'No posts by this user' });
-            }
-
-            else res.status(200).json(usersPosts);
-        })
-
-        .catch(error => {
-            console.log(error);
-
-            res.status(500).json({ message: 'Error getting posts by this user' });
-        });
 });
 
 module.exports = router;
