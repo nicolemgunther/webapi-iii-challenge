@@ -44,19 +44,22 @@ router.post('/', async (req, res) => {
     }
 
     catch (error) {
-        console.log(error);
-
         if (!postDetails.text || !postDetails.user_id){
-            res.status(400).json({ errorMessage: "Please provide the text and user ID for the post." });
+            res.status(400).json({ errorMessage: 'Please provide the text and user ID for the post' });
         }
 
-        else res.status(500).json({ message: 'Error inserting the post' });
+        else{
+            console.log(error);
+
+            res.status(500).json({ message: 'Error adding the post' });
+        }
     }
 });
 
 router.delete('/:id', async (req, res) => {
     try {
         const post = await Posts.remove(req.params.id);
+
         if (!post) {
             res.status(404).json({ message: 'The post could not be found' });
         }
@@ -85,13 +88,15 @@ router.put('/:id', async (req, res) => {
     }
 
     catch (error) {
-        console.log(error);
-
         if (!postDetails.text || !postDetails.user_id){
-            res.status(400).json({ errorMessage: "Please provide the text and user ID to change the post." });
+            res.status(400).json({ errorMessage: 'Please provide the text and user ID to change the post' });
         }
 
-        else res.status(500).json({ message: 'Error updating the post' });
+        else{
+            console.log(error);
+
+            res.status(500).json({ message: 'Error updating the post' });
+        }
     }
 });
 

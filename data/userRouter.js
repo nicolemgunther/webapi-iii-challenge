@@ -5,6 +5,7 @@ const router = express.Router();
 const nameCapitalization = (req, res, next) => {
     if (req.body.name){
         const { name } = req.body;
+
         req.body = {"name": name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')};
 
         next();
@@ -55,7 +56,6 @@ router.post('/', nameCapitalization, async (req, res) => {
     }
 
     catch (error) {
-
         if (!userDetails.name){
             res.status(400).json({ errorMessage: "Please provide the name for the user." });
         }
@@ -63,7 +63,7 @@ router.post('/', nameCapitalization, async (req, res) => {
         else{
             console.log(error);
 
-            res.status(500).json({ message: 'Error inserting the user' });
+            res.status(500).json({ message: 'Error adding the user' });
         } 
     }
 });
