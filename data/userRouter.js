@@ -2,6 +2,14 @@ const express = require('express');
 const Users = require('./helpers/userDb');
 const router = express.Router();
 
+const nameCapitalization = (req, res, next) => {
+    const { name } = req.body;
+
+    req.body = {"name": name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')};
+
+    next();
+}
+
 router.get('/', async (req, res) => {
     try {
         const users = await Users.get(req.query);
@@ -34,7 +42,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', nameCapitalization, async (req, res) => {
     const userDetails = req.body;
 
     try {
@@ -46,7 +54,7 @@ router.post('/', async (req, res) => {
     catch (error) {
         console.log(error);
 
-        if (!userDetails.name){
+        if (userDetails){
             res.status(400).json({ errorMessage: "Please provide the name for the user." });
         }
 
@@ -72,11 +80,11 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', nameCapitalization, async (req, res) => {
     const userDetails = req.body;
 
     try {
-        const user = await Users.update(req.params.id, req.body);
+        const user = await Users.update(req.params.id, userDetails);
 
         if (!user) {
             res.status(404).json({ message: 'The user could not be found' });
