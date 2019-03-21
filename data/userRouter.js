@@ -3,11 +3,14 @@ const Users = require('./helpers/userDb');
 const router = express.Router();
 
 const nameCapitalization = (req, res, next) => {
-    const { name } = req.body;
+    if (req.body.name){
+        const { name } = req.body;
+        req.body = {"name": name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')};
 
-    req.body = {"name": name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')};
+        next();
+    }
 
-    next();
+    else next();
 }
 
 router.get('/', async (req, res) => {
@@ -52,13 +55,15 @@ router.post('/', nameCapitalization, async (req, res) => {
     }
 
     catch (error) {
-        console.log(error);
 
         if (!userDetails.name){
             res.status(400).json({ errorMessage: "Please provide the name for the user." });
         }
 
-        else res.status(500).json({ message: 'Error inserting the user' });
+        else{
+            console.log(error);
+            res.status(500).json({ message: 'Error inserting the user' });
+        } 
     }
 });
 
@@ -94,13 +99,15 @@ router.put('/:id', nameCapitalization, async (req, res) => {
     }
 
     catch (error) {
-        console.log(error);
-        
         if (!userDetails.name){
             res.status(400).json({ errorMessage: "Please provide the new name for the user." });
         }
 
-        else res.status(500).json({ message: 'Error updating the user' });
+        else{
+            console.log(error);
+
+            res.status(500).json({ message: 'Error updating the user' });
+        }
     }
 });
 
