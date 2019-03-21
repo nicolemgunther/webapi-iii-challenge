@@ -54,7 +54,7 @@ router.post('/', nameCapitalization, async (req, res) => {
     catch (error) {
         console.log(error);
 
-        if (userDetails){
+        if (!userDetails.name){
             res.status(400).json({ errorMessage: "Please provide the name for the user." });
         }
 
