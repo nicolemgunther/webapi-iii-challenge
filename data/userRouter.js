@@ -57,7 +57,7 @@ router.post('/', nameCapitalization, async (req, res) => {
 
     catch (error) {
         if (!userDetails.name){
-            res.status(400).json({ errorMessage: "Please provide the name for the user." });
+            res.status(400).json({ errorMessage: 'Please provide the name for the user' });
         }
 
         else{
@@ -101,7 +101,7 @@ router.put('/:id', nameCapitalization, async (req, res) => {
 
     catch (error) {
         if (!userDetails.name){
-            res.status(400).json({ errorMessage: "Please provide the new name for the user." });
+            res.status(400).json({ errorMessage: 'Please provide the new name for the user' });
         }
 
         else{
